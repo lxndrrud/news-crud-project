@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { RegisterUserDto } from '../dto/RegisterUser.dto';
 import { LoginUserDto } from '../dto/LoginUser.dto';
 import { AUTH_REPO, IAuthRepo } from '../auth-repo/auth-repo';
@@ -33,6 +38,12 @@ export class AuthService implements IAuthService {
     if (payload.password !== payload.passwordConfirmation)
       throw new BadRequestException(
         'Password and its confirmation are not equal.',
+      );
+
+    const user = await this.authRepo.getUserByEmail(payload.email);
+    if (user)
+      throw new InternalServerErrorException(
+        'User with this email already exists!',
       );
 
     const hashedDto = new RegisterUserDto();

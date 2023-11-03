@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 
 export const UTILS_HASHER = 'UTILS_HASHER';
 
 export interface IHasher {
   hash(payload: string): Promise<string>;
-  compare(raw: string, hashed: any): Promise<boolean>;
+  compare(raw: string, hashed: string): Promise<boolean>;
 }
 
 @Injectable()
@@ -17,7 +17,7 @@ export class Hasher implements IHasher {
     return hashedPayload;
   }
 
-  async compare(raw: string, hashed) {
+  async compare(raw: string, hashed: string) {
     const result = await bcrypt.compare(raw, hashed);
     return result;
   }

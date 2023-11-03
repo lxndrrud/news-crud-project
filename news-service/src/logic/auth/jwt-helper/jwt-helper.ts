@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { TokenPayloadSchema } from '../validation-schemas/TokenPayload.schema';
 
 export const JWT_HELPER = 'JWT_HELPER';
@@ -28,7 +28,9 @@ export class JwtHelper implements IJwtHelper {
 
   async verifyAndGetPayload(token: string) {
     const payload = jwt.verify(token, process.env.JWT_SECRET as string);
-    const resultPayload = TokenPayloadSchema.validate(payload);
+    const resultPayload = TokenPayloadSchema.validate(payload, {
+      stripUnknown: true,
+    });
     if (resultPayload.error) throw resultPayload.error;
     return payload as { email: string };
   }
