@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { TokenPayloadSchema } from '../validation-schemas/TokenPayload.schema';
+import { TokenPayloadSchema } from './validation-schemas/TokenPayload.schema';
 
 export const JWT_HELPER = 'JWT_HELPER';
 
 export interface IJwtHelper {
-  signAccessToken(payload: { email: string }): Promise<string>;
-  signRefreshToken(payload: { email: string }): Promise<string>;
+  signToken(
+    payload: {
+      email: string;
+    },
+    expiresIn: string | number | undefined,
+  ): Promise<string>;
   verifyAndGetPayload(token: string): Promise<{
     email: string;
   }>;
@@ -14,15 +18,18 @@ export interface IJwtHelper {
 
 @Injectable()
 export class JwtHelper implements IJwtHelper {
-  async signAccessToken(payload: { email: string }) {
+  /**
+   *
+   * @param payload
+   * @param expiresIn expressed in seconds or a string describing a time span zeit/ms. Eg: 60, "2 days", "10h", "7d"
+   * @returns
+   */
+  async signToken(
+    payload: { email: string },
+    expiresIn: string | number | undefined,
+  ) {
     return jwt.sign(payload, process.env.JWT_SECRET as string, {
-      expiresIn: '3m',
-    });
-  }
-
-  async signRefreshToken(payload: { email: string }) {
-    return jwt.sign(payload, process.env.JWT_SECRET as string, {
-      expiresIn: '3d',
+      expiresIn: expiresIn,
     });
   }
 
@@ -32,6 +39,6 @@ export class JwtHelper implements IJwtHelper {
       stripUnknown: true,
     });
     if (resultPayload.error) throw resultPayload.error;
-    return payload as { email: string };
+    return resultPayload.value as { email: string };
   }
 }

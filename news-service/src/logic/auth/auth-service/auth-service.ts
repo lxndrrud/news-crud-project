@@ -1,26 +1,50 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../dto/RegisterUser.dto';
-import { LoginUserDto } from '../dto/LoginUser.dto';
-import { AUTH_REPO, IAuthRepo } from '../auth-repo/auth-repo';
-import { IHasher, UTILS_HASHER } from 'src/shared/utils/hasher/hasher';
-import { IJwtHelper, JWT_HELPER } from '../jwt-helper/jwt-helper';
-import { LoginError } from '../errors/LoginError';
-import { UpdateTokenDto } from '../dto/UpdateTokens.dto';
+import { LoginUserRequestDto } from '../dto/LoginUserRequest.dto';
+import { AUTH_REPO } from '../auth-repo/auth-repo';
+import { UTILS_HASHER } from 'src/shared/utils/hasher/hasher';
+import { JWT_HELPER } from 'src/shared/utils/jwt-helper/jwt-helper';
+import { UpdateTokensRequestDto } from '../dto/UpdateTokensRequest.dto';
+import { InternalError } from 'src/shared/errors/InternalError';
+import { InvalidRequestError } from 'src/shared/errors/InvalidRequestError';
+import { User } from 'src/database/entities/User.entity';
 
+// Identifier for Dependency Injection
 export const AUTH_SERVICE = 'AUTH_SERVICE';
 
+// In-module dependency interface (Clean Architecture)
+interface IDepAuthRepo {
+  getUserByEmail(email: string): Promise<User | null>;
+  createUser(payload: RegisterUserDto): Promise<void>;
+}
+
+// In-module dependency interface (Clean Architecture)
+interface IDepJwtHelper {
+  signToken(
+    payload: {
+      email: string;
+    },
+    expiresIn: string | number | undefined,
+  ): Promise<string>;
+
+  verifyAndGetPayload(token: string): Promise<{
+    email: string;
+  }>;
+}
+
+interface IDepHasher {
+  hash(payload: string): Promise<string>;
+  compare(raw: string, hashed: string): Promise<boolean>;
+}
+
+// Service interface for flexible refactoring
 export interface IAuthService {
   registerUser(payload: RegisterUserDto): Promise<void>;
-  loginUser(payload: LoginUserDto): Promise<{
+  loginUser(payload: LoginUserRequestDto): Promise<{
     access: string;
     refresh: string;
   }>;
-  updateTokens(payload: UpdateTokenDto): Promise<{
+  updateTokens(payload: UpdateTokensRequestDto): Promise<{
     access: string;
     refresh: string;
   }>;
@@ -29,22 +53,19 @@ export interface IAuthService {
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(
-    @Inject(AUTH_REPO) private readonly authRepo: IAuthRepo,
-    @Inject(JWT_HELPER) private readonly jwtHelper: IJwtHelper,
-    @Inject(UTILS_HASHER) private readonly hasher: IHasher,
+    @Inject(AUTH_REPO) private readonly authRepo: IDepAuthRepo,
+    @Inject(JWT_HELPER) private readonly jwtHelper: IDepJwtHelper,
+    @Inject(UTILS_HASHER) private readonly hasher: IDepHasher,
   ) {}
 
   async registerUser(payload: RegisterUserDto) {
     if (payload.password !== payload.passwordConfirmation)
-      throw new BadRequestException(
+      throw new InvalidRequestError(
         'Password and its confirmation are not equal.',
       );
 
     const user = await this.authRepo.getUserByEmail(payload.email);
-    if (user)
-      throw new InternalServerErrorException(
-        'User with this email already exists!',
-      );
+    if (user) throw new InternalError('User with this email already exists!');
 
     const hashedDto = new RegisterUserDto();
     hashedDto.email = payload.email;
@@ -54,10 +75,10 @@ export class AuthService implements IAuthService {
     await this.authRepo.createUser(hashedDto);
   }
 
-  async loginUser(payload: LoginUserDto) {
+  async loginUser(payload: LoginUserRequestDto) {
     const user = await this.authRepo.getUserByEmail(payload.email);
     if (!user)
-      throw new LoginError(
+      throw new InternalError(
         'User with this combination of email and password is not found!',
       );
     const isPasswordValid = await this.hasher.compare(
@@ -65,12 +86,18 @@ export class AuthService implements IAuthService {
       user.password,
     );
     if (!isPasswordValid)
-      throw new LoginError(
+      throw new InternalError(
         'User with this combination of email and password is not found!',
       );
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtHelper.signAccessToken({ email: user.email }),
-      this.jwtHelper.signRefreshToken({ email: user.email }),
+      this.jwtHelper.signToken(
+        { email: user.email },
+        process.env.JWT_ACCESS_EXPIRES_IN as string,
+      ),
+      this.jwtHelper.signToken(
+        { email: user.email },
+        process.env.JWT_REFRESH_EXPIRES_IN as string,
+      ),
     ]);
 
     return {
@@ -79,18 +106,24 @@ export class AuthService implements IAuthService {
     };
   }
 
-  async updateTokens(payload: UpdateTokenDto) {
+  async updateTokens(payload: UpdateTokensRequestDto) {
     const refreshTokenPayload = await this.jwtHelper.verifyAndGetPayload(
       payload.refreshToken,
     );
 
     const user = await this.authRepo.getUserByEmail(refreshTokenPayload.email);
     if (!user)
-      throw new LoginError('Authorization failed! Try to re-login, please.');
+      throw new InternalError('Authorization failed! Try to re-login, please.');
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtHelper.signAccessToken({ email: user.email }),
-      this.jwtHelper.signRefreshToken({ email: user.email }),
+      this.jwtHelper.signToken(
+        { email: user.email },
+        process.env.JWT_ACCESS_EXPIRES_IN as string,
+      ),
+      this.jwtHelper.signToken(
+        { email: user.email },
+        process.env.JWT_REFRESH_EXPIRES_IN as string,
+      ),
     ]);
     return {
       access: accessToken,

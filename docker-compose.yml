@@ -29,10 +29,13 @@ services:
     environment:
       DB_HOST: "news_database"
       DB_NAME: "newsdb"
+      DB_SCHEMA: "public"
       DB_PORT: "5432"
       DB_USER: "newsuser"
       DB_PASSWORD: "newspassw0rd"
       JWT_SECRET: "ASdas7d9132sjdfsdlfkgfhfg4872"
+      JWT_ACCESS_EXPIRES_IN: "3m"
+      JWT_REFRESH_EXPIRES_IN: "3d"
 
 networks:
   news_network:

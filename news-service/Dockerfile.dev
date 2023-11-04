@@ -1,6 +1,5 @@
 FROM node:18-alpine3.17
 WORKDIR /var/www/news-service
 COPY ./ /var/www/news-service
-# RUN npm i
 ENTRYPOINT ["npm", "run", "start:dev"]
 EXPOSE 3035

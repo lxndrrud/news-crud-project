@@ -1,8 +1,10 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { AUTH_SERVICE, IAuthService } from './auth-service/auth-service';
 import { RegisterUserDto } from './dto/RegisterUser.dto';
-import { LoginUserDto } from './dto/LoginUser.dto';
-import { UpdateTokenDto } from './dto/UpdateTokens.dto';
+import { LoginUserRequestDto } from './dto/LoginUserRequest.dto';
+import { UpdateTokensRequestDto } from './dto/UpdateTokensRequest.dto';
+import { UpdateTokensResponseDto } from './dto/UpdateTokensResponse.dto';
+import { LoginUserResponseDto } from './dto/LoginUserResponse.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,14 +18,22 @@ export class AuthController {
   }
 
   @Post('/login')
-  async loginUser(@Body() payload: LoginUserDto) {
+  async loginUser(@Body() payload: LoginUserRequestDto) {
     const result = await this.authService.loginUser(payload);
-    return result;
+    const preparedResult = new LoginUserResponseDto(
+      result.access,
+      result.refresh,
+    );
+    return preparedResult;
   }
 
   @Post('/update-tokens')
-  async updateTokens(@Body() payload: UpdateTokenDto) {
+  async updateTokens(@Body() payload: UpdateTokensRequestDto) {
     const result = await this.authService.updateTokens(payload);
-    return result;
+    const preparedResult = new UpdateTokensResponseDto(
+      result.access,
+      result.refresh,
+    );
+    return preparedResult;
   }
 }

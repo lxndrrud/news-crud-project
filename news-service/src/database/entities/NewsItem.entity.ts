@@ -7,12 +7,12 @@ import {
 } from 'typeorm';
 import { User } from './User.entity';
 
-@Entity({ name: 'public.news' })
+@Entity({ name: 'news' })
 export class NewsItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 80 })
   title: string;
 
   @Column({ type: 'text' })
