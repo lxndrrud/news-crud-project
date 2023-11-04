@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { TokenPayloadSchema } from './validation-schemas/TokenPayload.schema';
 
-export const JWT_HELPER = 'JWT_HELPER';
+export const UTILS_JWT_HELPER = 'UTILS_JWT_HELPER';
 
 export interface IJwtHelper {
   signToken(

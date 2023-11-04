@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { TYPEORM_CONNECTION } from 'src/database/TypeormConnection';
+import { TYPEORM_CONNECTION } from '../../../database/TypeormConnection';
 import { DataSource } from 'typeorm';
 import { RegisterUserDto } from '../dto/RegisterUser.dto';
-import { User } from 'src/database/entities/User.entity';
+import { User } from '../../../database/entities/User.entity';
 
 export const AUTH_REPO = 'AUTH_REPO';
 

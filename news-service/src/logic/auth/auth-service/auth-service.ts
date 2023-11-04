@@ -2,12 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../dto/RegisterUser.dto';
 import { LoginUserRequestDto } from '../dto/LoginUserRequest.dto';
 import { AUTH_REPO } from '../auth-repo/auth-repo';
-import { UTILS_HASHER } from 'src/shared/utils/hasher/hasher';
-import { JWT_HELPER } from 'src/shared/utils/jwt-helper/jwt-helper';
+import { UTILS_HASHER } from '../../../shared/utils/hasher/hasher';
+import { UTILS_JWT_HELPER } from '../../../shared/utils/jwt-helper/jwt-helper';
 import { UpdateTokensRequestDto } from '../dto/UpdateTokensRequest.dto';
-import { InternalError } from 'src/shared/errors/InternalError';
-import { InvalidRequestError } from 'src/shared/errors/InvalidRequestError';
-import { User } from 'src/database/entities/User.entity';
+import { InternalError } from '../../../shared/errors/InternalError';
+import { InvalidRequestError } from '../../../shared/errors/InvalidRequestError';
+import { User } from '../../../database/entities/User.entity';
 
 // Identifier for Dependency Injection
 export const AUTH_SERVICE = 'AUTH_SERVICE';
@@ -54,7 +54,7 @@ export interface IAuthService {
 export class AuthService implements IAuthService {
   constructor(
     @Inject(AUTH_REPO) private readonly authRepo: IDepAuthRepo,
-    @Inject(JWT_HELPER) private readonly jwtHelper: IDepJwtHelper,
+    @Inject(UTILS_JWT_HELPER) private readonly jwtHelper: IDepJwtHelper,
     @Inject(UTILS_HASHER) private readonly hasher: IDepHasher,
   ) {}
 
