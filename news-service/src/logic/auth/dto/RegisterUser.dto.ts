@@ -8,14 +8,20 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @IsStrongPassword({
     minLength: 6,
-    minNumbers: 1,
+    minLowercase: 0,
+    minNumbers: 0,
+    minUppercase: 0,
+    minSymbols: 0,
   })
   password: string;
 
   @IsNotEmpty()
   @IsStrongPassword({
     minLength: 6,
-    minNumbers: 1,
+    minLowercase: 0,
+    minNumbers: 0,
+    minUppercase: 0,
+    minSymbols: 0,
   })
   passwordConfirmation: string;
 }
