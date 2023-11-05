@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { TYPEORM_CONNECTION } from 'src/database/TypeormConnection';
-import { NewsItem } from 'src/database/entities/NewsItem.entity';
+import { TYPEORM_CONNECTION } from '../../../database/TypeormConnection';
+import { NewsItem } from '../../../database/entities/NewsItem.entity';
 import { DataSource } from 'typeorm';
 import { CreateNewsItemDto } from '../dto/CreateNewsItem.dto';
-import { User } from 'src/database/entities/User.entity';
+import { User } from '../../../database/entities/User.entity';
 
 export const NEWS_REPO = 'NEWS_REPO';
 

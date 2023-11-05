@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NEWS_REPO } from '../news-repo/news-repo';
 import { CreateNewsItemDto } from '../dto/CreateNewsItem.dto';
-import { User } from 'src/database/entities/User.entity';
-import { AUTH_REPO } from 'src/logic/auth/auth-repo/auth-repo';
-import { InternalError } from 'src/shared/errors/InternalError';
+import { User } from '../../../database/entities/User.entity';
+import { AUTH_REPO } from '../../auth/auth-repo/auth-repo';
+import { InternalError } from '../../../shared/errors/InternalError';
 import { EditNewsItemDto } from '../dto/EditNewsItem.dto';
-import { NewsItem } from 'src/database/entities/NewsItem.entity';
+import { NewsItem } from '../../../database/entities/NewsItem.entity';
 import { DeleteNewsItemDto } from '../dto/DeleteNewsItem.dto';
 
 // Identifier for Dependency Injection
@@ -89,7 +89,7 @@ export class NewsService implements INewsService {
 
   async deleteNewsItem(payload: DeleteNewsItemDto, userEmail: string) {
     const user = await this.userRepo.getUserByEmail(userEmail);
-    if (!user) throw new InternalError('author is not found.');
+    if (!user) throw new InternalError('User is not found.');
 
     const newsItem = await this.newsRepo.getVisibleNewsItem(payload.newsItemId);
     if (!newsItem)

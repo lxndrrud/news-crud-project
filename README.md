@@ -2,7 +2,15 @@
 
 ## Запуск проекта (установка зависимостей и запуск контейнеров Docker через Docker-Compose)
 
+```shell
 sh launch.sh
+```
+
+## Запуск unit-тестов для сервисов бизнес-логики.
+
+```shell
+sh unit-tests.sh
+```
 
 ## Документация API находится в файле api_endpoints.xlsx
 
