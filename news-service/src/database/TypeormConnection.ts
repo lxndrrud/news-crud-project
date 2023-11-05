@@ -14,7 +14,7 @@ export const TypeormConnection = {
       database: process.env.DB_NAME,
       schema: process.env.DB_SCHEMA,
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      synchronize: false,
+      synchronize: true,
     });
 
     return dataSource.initialize();

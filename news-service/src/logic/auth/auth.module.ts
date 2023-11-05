@@ -2,9 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AUTH_SERVICE, AuthService } from './auth-service/auth-service';
 import { AUTH_REPO, AuthRepo } from './auth-repo/auth-repo';
-import { DatabaseModule } from 'src/database/database.module';
-import { SharedModule } from 'src/shared/shared.module';
-import { JWT_HELPER, JwtHelper } from 'src/shared/utils/jwt-helper/jwt-helper';
+import { DatabaseModule } from '../../database/database.module';
+import { SharedModule } from '../../shared/shared.module';
+import {
+  UTILS_JWT_HELPER,
+  JwtHelper,
+} from '../../shared/utils/jwt-helper/jwt-helper';
 import { JwtStrategy } from './jwt-strategy/jwt-strategy';
 
 @Module({
@@ -20,7 +23,7 @@ import { JwtStrategy } from './jwt-strategy/jwt-strategy';
       useClass: AuthRepo,
     },
     {
-      provide: JWT_HELPER,
+      provide: UTILS_JWT_HELPER,
       useClass: JwtHelper,
     },
     JwtStrategy,
